@@ -18,15 +18,14 @@ const SASS_OUTPUT = "compressed"
 
 // Cleanin up dir
 function clean(cb){
-    del([DEST_DIR]);
-    cb();
+    del([DEST_DIR]).then(() => cb());
 }
 
 // Simple images minify
 function minifyImages(cb){
     src("src/assets/img/**/*")
     .pipe(imagemin())
-    .pipe(dest(`${DEST_DIR}/img`));
+    .pipe(dest(`${DEST_DIR}/assets/img`));
     cb();
 }
 
@@ -40,7 +39,7 @@ function minifyHtml(cb){
             collapseWhitespace: true
         })
     )
-    .pipe(gulp.dest("dist"));
+    .pipe(gulp.dest(DEST_DIR));
     cb();
 }
 
@@ -62,6 +61,7 @@ function minifyNunjucks(cb){
 }
 
 
+
 // "Compile" nunjucks
 function nunjucks(cb){
     src("src/views/*.html")
@@ -69,7 +69,7 @@ function nunjucks(cb){
         nunjucksRender({
             path: ["src/templates/"]
         })
-    )
+    ).on("error", console.log)
     .pipe(dest(DEST_DIR));
     cb();
 }
@@ -100,6 +100,17 @@ function compileScss(cb){
     cb();
 }
 
+
+// Copy other assets
+function copyFiles(cb){
+    src([
+        "!src/assets/img/**/*",
+        "src/assets/**/*"
+    ])
+    .pipe(dest(`${DEST_DIR}/assets`))
+    cb();
+}
+
 // Copies html files (when not in template mode)
 function copyHtml(cb){
     src("src/views/**/*.html").pipe(dest(DEST_DIR))
@@ -116,8 +127,9 @@ function watchTask(){
     });
     watch("src/scss/**/*.scss", compileScss);
     watch("src/js/**/*.js", compileJs).on("change", browserSync.reload);
-    watch("src/assets/img/**/*").on("change", browserSync.reload);
+    watch("src/assets/img/**/*", minifyImages).on("change", browserSync.reload);
     watch("src/views/**/*.html", HtmlTask).on("change", browserSync.reload);
+    watch("src/assets/**/*", copyFiles).on("change", browserSync.reload);
     if(USE_TEMPLATES){
         watch("src/templates/**/*.html", nunjucks).on("change", browserSync.reload);
     }
@@ -125,5 +137,5 @@ function watchTask(){
 
 
 
-exports.default = series(HtmlTask,minifyImages, compileScss, compileJs, watchTask);
-exports.build = series(clean, parallel( USE_TEMPLATES ? minifyNunjucks : minifyHtml, minifyImages,compileScss, compileJs));
+exports.default = series(HtmlTask,minifyImages, compileScss, compileJs, copyFiles, watchTask);
+exports.build = series(clean, parallel( USE_TEMPLATES ? minifyNunjucks : minifyHtml, minifyImages,compileScss, compileJs, copyFiles));

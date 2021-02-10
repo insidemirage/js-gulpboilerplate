@@ -28,5 +28,17 @@ gulp
 gulp build 
 ```
 
+## Adding more SCSS entry points:
+In gulpfile.js:
+```javascript
+...
+const del = require('del');
+
+let scssImports = ["src/scss/index.scss", "src/scss/yourfile.css", "src/scss/yourfile2.css"] 
+
+const USE_TEMPLATES = true;
+...
+```
+
 ## Notice:
 The piggy logo is prohibited for use in projects that is not Ravelabs projects. It's under copyright.

@@ -10,6 +10,8 @@ const autoprefixer = require('gulp-autoprefixer');
 const babel = require('gulp-babel');
 const del = require('del');
 
+let scssImports = ["src/scss/style.scss"]
+
 const USE_TEMPLATES = true;
 const HtmlTask = USE_TEMPLATES ? nunjucks:copyHtml;
 const DEST_DIR = "./build";
@@ -90,16 +92,16 @@ function compileJs(cb){
 
 // "Compile" SCSS
 function compileScss(cb){
-    src("src/scss/**/*.scss")
+    src(scssImports)
         .pipe(sass({outputStyle:SASS_OUTPUT}).on("error", sass.logError))
         .pipe(autoprefixer({
             cascade: false
         }))
+        .pipe(cleanCSS({compatibility: 'ie8'}))
         .pipe(dest(`${DEST_DIR}/css`))
         .pipe(browserSync.stream());
     cb();
 }
-
 
 // Copy other assets
 function copyFiles(cb){

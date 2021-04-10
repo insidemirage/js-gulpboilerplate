@@ -9,7 +9,7 @@ const concat = require("gulp-concat");
 const autoprefixer = require('gulp-autoprefixer');
 const babel = require('gulp-babel');
 const del = require('del');
-
+const cleanCSS = require('gulp-clean-css');
 let scssImports = ["src/scss/style.scss"]
 
 const USE_TEMPLATES = true;
